@@ -12,6 +12,19 @@ export class RateLimiter implements IRateLimiter {
   }
 
   validate(args: IcreateRateLimiterParams): void {
-    return;
+    if (typeof args.expiresIn !== "number") {
+      throw new Error("ExpiresIn field must be a number");
+    }
+    if (args.whiteList && !Array.isArray(args.whiteList)) {
+      throw new Error("WhiteList field must be a string list");
+    }
+    if (typeof args.store !== "function") {
+      console.log("a");
+      throw new Error("Store field must be a function");
+    }
+    if (typeof args.key !== "function") {
+      console.log("a");
+      throw new Error("key field must be a function");
+    }
   }
 }
