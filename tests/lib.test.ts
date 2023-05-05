@@ -20,5 +20,16 @@ describe("Rate Limiter", () => {
         sut.create(validParams);
       }).toThrowError();
     });
+    test("should return the function returned by middleware method", () => {
+      const sut = makeSut();
+      const fn = () => {
+        return;
+      };
+      jest.spyOn(sut, "middleware").mockImplementationOnce(() => {
+        return fn;
+      });
+      const result = sut.create(validParams);
+      expect(result).toEqual(fn);
+    });
   });
 });

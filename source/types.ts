@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { NextFunction, Request, Response } from "express";
 
 export interface IcreateRateLimiterParams {
   expiresIn: number;
@@ -9,6 +9,9 @@ export interface IcreateRateLimiterParams {
   store: (args: string) => number;
 }
 export interface IRateLimiter {
-  create(args: IcreateRateLimiterParams): void;
+  create(args: IcreateRateLimiterParams): () => void;
   validate(args: IcreateRateLimiterParams): void;
+  middleware(
+    args: IcreateRateLimiterParams
+  ): (req: Request, res: Response, next: NextFunction) => void;
 }
