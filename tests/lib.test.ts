@@ -28,7 +28,7 @@ describe("Rate Limiter", () => {
     });
     test("should return the function returned by middleware method", () => {
       const sut = makeSut();
-      const fn = () => {
+      const fn = async (req, res, next) => {
         return;
       };
       jest.spyOn(sut, "middleware").mockImplementationOnce(() => {
@@ -40,7 +40,7 @@ describe("Rate Limiter", () => {
   });
 
   describe("Validate", () => {
-    test("should throw if invalid params is provided", () => {
+    test("should throw if invalid param is provided", () => {
       const sut = makeSut().validate;
       expect(() => {
         sut(InvalidExpires);

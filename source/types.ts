@@ -9,9 +9,11 @@ export interface IcreateRateLimiterParams {
   store: (args: string) => number;
 }
 export interface IRateLimiter {
-  create(args: IcreateRateLimiterParams): () => void;
-  validate(args: IcreateRateLimiterParams): void;
-  middleware(
+  create: (
     args: IcreateRateLimiterParams
-  ): (req: Request, res: Response, next: NextFunction) => void;
+  ) => (req: Request, res: Response, next: NextFunction) => Promise<void>;
+  validate(args: IcreateRateLimiterParams): void;
+  middleware: (
+    args: IcreateRateLimiterParams
+  ) => (req: Request, res: Response, next: NextFunction) => void;
 }
