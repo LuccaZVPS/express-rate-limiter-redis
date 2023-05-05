@@ -11,5 +11,14 @@ describe("Rate Limiter", () => {
       sut.create(validParams);
       expect(spy).toHaveBeenCalledWith(validParams);
     });
+    test("should throws if validate throws", () => {
+      const sut = makeSut();
+      jest.spyOn(sut, "validate").mockImplementationOnce(() => {
+        throw new Error("any error");
+      });
+      expect(() => {
+        sut.create(validParams);
+      }).toThrowError();
+    });
   });
 });

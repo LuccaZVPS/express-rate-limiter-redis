@@ -1,4 +1,4 @@
-import { IcreateRateLimiterParams } from "@/types";
+import { IcreateRateLimiterParams } from "../../source/types";
 
 export const validParams: IcreateRateLimiterParams = {
   expiresIn: 60,
