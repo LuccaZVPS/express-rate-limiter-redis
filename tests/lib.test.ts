@@ -40,7 +40,7 @@ describe("Rate Limiter", () => {
   });
 
   describe("Validate", () => {
-    test("should throw if invalid args is provided", () => {
+    test("should throw if invalid params is provided", () => {
       const sut = makeSut().validate;
       expect(() => {
         sut(InvalidExpires);
@@ -53,6 +53,10 @@ describe("Rate Limiter", () => {
       expect(() => {
         sut(InvalidStore);
       }).toThrowError();
+    });
+    test("should return void if valid params is provided", () => {
+      const sut = makeSut().validate;
+      expect(sut(validParams)).toBeFalsy();
     });
   });
 });
