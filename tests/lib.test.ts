@@ -95,4 +95,25 @@ describe("Rate Limiter", () => {
       expect(sha).toBe("any sha");
     });
   });
+
+  describe("runScript", () => {
+    const sut = makeSut().runScript;
+    const cbMock = {
+      cb: async () => {
+        return { max: 30, current: 5 };
+      },
+    };
+    test("should call cb with correct value", () => {
+      const spy = jest.spyOn(cbMock, "cb");
+      sut(cbMock.cb, 30, "any_key", "any_sha", 60);
+      expect(spy).toBeCalledWith(
+        "EVALSHA",
+        "any_sha",
+        1,
+        "any_key",
+        JSON.stringify({ max: 30, current: 0 }),
+        60
+      );
+    });
+  });
 });

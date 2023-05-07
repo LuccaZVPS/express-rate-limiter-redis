@@ -1,6 +1,22 @@
 import { NextFunction, Request, Response } from "express";
-import { IRateLimiter, IcreateRateLimiterParams } from "./types";
+import { IRateLimiter, IcreateRateLimiterParams, script } from "./types";
 export class RateLimiter implements IRateLimiter {
+  async runScript(
+    cb: (...args: string[]) => Promise<script>,
+    max: number,
+    key: string,
+    sha: string,
+    expiresIn: number
+  ): Promise<script> {
+    return await cb(
+      "EVALSHA",
+      `${sha}`,
+      1 as unknown as string,
+      key,
+      JSON.stringify({ max, current: 0 }),
+      expiresIn as unknown as string
+    );
+  }
   create(args: IcreateRateLimiterParams) {
     this.validate(args);
     return this.middleware(args);
