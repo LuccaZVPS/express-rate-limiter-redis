@@ -28,7 +28,7 @@ describe("Rate Limiter", () => {
     });
     test("should return the function returned by middleware method", () => {
       const sut = makeSut();
-      const fn = async (req, res, next) => {
+      const fn = async () => {
         return;
       };
       jest.spyOn(sut, "middleware").mockImplementationOnce(() => {
@@ -61,15 +61,15 @@ describe("Rate Limiter", () => {
   });
 
   describe("generateSha", () => {
-    test("should call the callback function with correct value", () => {
-      const sut = makeSut().generateSha;
-      const cbMock = {
-        cb: async (...args: string[]) => {
-          return "any sha";
-        },
-      };
+    const sut = makeSut().generateSha;
+    const cbMock = {
+      cb: async () => {
+        return "any sha";
+      },
+    };
+    test("should call the callback function with correct value", async () => {
       const spy = jest.spyOn(cbMock, "cb");
-      sut(cbMock.cb);
+      await sut(cbMock.cb);
       const script = `
     local value = redis.call("GET", KEYS[1])
     if value then
@@ -88,6 +88,11 @@ describe("Rate Limiter", () => {
     end
   `;
       expect(spy).toHaveBeenCalledWith("SCRIPT", "LOAD", script);
+    });
+
+    test("should return the callback value", async () => {
+      const sha = await sut(cbMock.cb);
+      expect(sha).toBe("any sha");
     });
   });
 });
