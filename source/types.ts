@@ -6,9 +6,10 @@ export interface IcreateRateLimiterParams {
   message?: string;
   key: (req: Request) => string;
   whiteList?: string[];
-  store: (args: string) => number;
+  store: (...args: string[]) => any;
 }
 export interface IRateLimiter {
+  generateSha(cb: (...args: string[]) => Promise<string>): Promise<string>;
   create: (
     args: IcreateRateLimiterParams
   ) => (req: Request, res: Response, next: NextFunction) => Promise<void>;
