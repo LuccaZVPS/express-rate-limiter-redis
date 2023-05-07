@@ -115,5 +115,10 @@ describe("Rate Limiter", () => {
         60
       );
     });
+
+    test("should return the callback object", async () => {
+      const object = await sut(cbMock.cb, 30, "any_key", "any_sha", 60);
+      expect(object).toEqual({ max: 30, current: 5 });
+    });
   });
 });
