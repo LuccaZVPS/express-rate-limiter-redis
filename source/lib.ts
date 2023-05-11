@@ -25,13 +25,13 @@ export class RateLimiter implements IRateLimiter {
     );
     return JSON.parse(value);
   }
-
   middleware() {
     return async (req: Request, res: Response, next: NextFunction) => {
+      const { store, key, max, expiresIn } = this.config;
+      await this.runScript(store, max, key(req), expiresIn);
       next();
     };
   }
-
   async generateSha(
     cb: (...args: string[]) => Promise<string>
   ): Promise<string> {
@@ -44,15 +44,12 @@ export class RateLimiter implements IRateLimiter {
       redis.call("EXPIRE", KEYS[1], ARGV[2])
       return cjson.encode(obj)
     end
-
     redis.call("SET", KEYS[1], ARGV[1])
     local newObj = { current = 1, max = tonumber(ARGV[2]) }
     return cjson.encode(newObj)
-
     `;
     return await cb("SCRIPT", "LOAD", script);
   }
-
   public validate(args: IRateLimiterParams): void {
     if (typeof args.expiresIn !== "number") {
       throw new Error("ExpiresIn field must be a number");

@@ -1,4 +1,5 @@
 import { RateLimiter } from "../source/lib";
+import { mockRequest, mockResponse } from "mock-req-res";
 import {
   InvalidExpires,
   InvalidList,
@@ -9,6 +10,23 @@ describe("Rate Limiter", () => {
   const makeSut = () => {
     return new RateLimiter(validParams);
   };
+  describe("Middleware", () => {
+    const res = mockResponse();
+    const req = mockRequest();
+    const nextFn = jest.fn();
+    test("should call runScript method with correct value", async () => {
+      const sut = makeSut();
+      const spy = jest.spyOn(sut, "runScript");
+      const middleware = sut.middleware();
+      await middleware(req, res, nextFn);
+      expect(spy).toHaveBeenCalledWith(
+        validParams.store,
+        validParams.max,
+        validParams.key(req),
+        validParams.expiresIn
+      );
+    });
+  });
   describe("Validate", () => {
     test("should throw if invalid param is provided", () => {
       const sut = makeSut().validate;
@@ -49,11 +67,9 @@ describe("Rate Limiter", () => {
       redis.call("EXPIRE", KEYS[1], ARGV[2])
       return cjson.encode(obj)
     end
-
     redis.call("SET", KEYS[1], ARGV[1])
     local newObj = { current = 1, max = tonumber(ARGV[2]) }
     return cjson.encode(newObj)
-
     `;
       expect(spy).toHaveBeenCalledWith("SCRIPT", "LOAD", script);
     });
