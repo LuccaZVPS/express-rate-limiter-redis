@@ -1,4 +1,4 @@
-import { RateLimiter } from "../source/lib";
+import { RateLimiter } from "../lib/lib";
 import { mockRequest, mockResponse } from "mock-req-res";
 import {
   InvalidExpires,

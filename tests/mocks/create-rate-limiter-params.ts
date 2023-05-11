@@ -1,4 +1,4 @@
-import { IRateLimiterParams } from "../../source/types";
+import { IRateLimiterParams } from "../../lib/types";
 
 export const validParams: IRateLimiterParams = {
   expiresIn: 60,
