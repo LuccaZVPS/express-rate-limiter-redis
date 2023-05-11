@@ -4,10 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --ignore-watch node_modules source/lib.ts",
+    "dev": "ts-node-dev --respawn --ignore-watch node_modules lib/lib.ts",
     "prepare": "husky install",
     "test": "jest --passWithNoTests --runInBand",
-    "test:staged": "npm test -- --findRelatedTests"
+    "test:staged": "npm test -- --findRelatedTests",
+    "test:integration": "npm test -- --watch -c jest-integration-config.js",
+    "test:unit": "npm test -- --watch -c jest-unit-config.js"
   },
   "keywords": [],
   "author": "",
