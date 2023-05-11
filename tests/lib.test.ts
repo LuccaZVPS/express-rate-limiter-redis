@@ -43,6 +43,14 @@ describe("Rate Limiter", () => {
       await middleware(req, res, nextFunction);
       expect(spy).toHaveBeenCalledWith(429);
     });
+    test("should call next function if current property if less than max", async () => {
+      const sut = makeCustomSut(10, 8);
+      const toSpy = { next: jest.fn() };
+      const middleware = sut.middleware();
+      const spy = jest.spyOn(toSpy, "next");
+      await middleware(req, res, toSpy.next);
+      expect(spy).toHaveBeenCalled();
+    });
   });
   describe("Validate", () => {
     test("should throw if invalid param is provided", () => {
