@@ -1,30 +1,33 @@
 import { NextFunction, Request, Response } from "express";
-import { IRateLimiter, IcreateRateLimiterParams, script } from "./types";
+import { IRateLimiter, IRateLimiterParams, script } from "./types";
 export class RateLimiter implements IRateLimiter {
+  config: IRateLimiterParams;
+  sha: Promise<string>;
+  constructor(private readonly args: IRateLimiterParams) {
+    this.validate(args);
+    this.config = args;
+    this.sha = this.generateSha(args.store);
+  }
   async runScript(
-    cb: (...args: string[]) => Promise<script>,
+    cb: (...args: string[]) => Promise<string>,
     max: number,
     key: string,
-    sha: string,
     expiresIn: number
   ): Promise<script> {
-    return await cb(
+    const sha = await this.sha;
+    const value = await this.config.store(
       "EVALSHA",
       `${sha}`,
       1 as unknown as string,
       key,
-      JSON.stringify({ max, current: 0 }),
+      JSON.stringify({ max, current: 1 }),
       expiresIn as unknown as string
     );
-  }
-  create(args: IcreateRateLimiterParams) {
-    this.validate(args);
-    return this.middleware(args);
+    return JSON.parse(value);
   }
 
-  middleware(args: IcreateRateLimiterParams) {
+  middleware() {
     return async (req: Request, res: Response, next: NextFunction) => {
-      const current = args.store("");
       next();
     };
   }
@@ -36,23 +39,21 @@ export class RateLimiter implements IRateLimiter {
     local value = redis.call("GET", KEYS[1])
     if value then
       local obj = cjson.decode(value)
-      if obj.current == obj.max then
-        return true
-      else
-        obj.current = obj.current + 1
-        redis.call("SET", KEYS[1], cjson.encode(obj))
-        return false
-      end
-    else
-      redis.call("SET", KEYS[1], ARGV[1])
+      obj.current = obj.current + 1
+      redis.call("SET", KEYS[1], cjson.encode(obj))
       redis.call("EXPIRE", KEYS[1], ARGV[2])
-      return nil
+      return cjson.encode(obj)
     end
-  `;
+
+    redis.call("SET", KEYS[1], ARGV[1])
+    local newObj = { current = 1, max = tonumber(ARGV[2]) }
+    return cjson.encode(newObj)
+
+    `;
     return await cb("SCRIPT", "LOAD", script);
   }
 
-  validate(args: IcreateRateLimiterParams): void {
+  public validate(args: IRateLimiterParams): void {
     if (typeof args.expiresIn !== "number") {
       throw new Error("ExpiresIn field must be a number");
     }

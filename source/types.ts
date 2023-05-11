@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
-export interface IcreateRateLimiterParams {
+export interface IRateLimiterParams {
   expiresIn: number;
   max: number;
   message?: string;
@@ -14,18 +14,12 @@ export interface script {
 }
 export interface IRateLimiter {
   runScript(
-    cb: (...args: string[]) => Promise<script>,
+    cb: (...args: string[]) => Promise<string>,
     max: number,
     key: string,
-    sha: string,
     expiresIn: number
   ): Promise<script>;
   generateSha(cb: (...args: string[]) => Promise<string>): Promise<string>;
-  create: (
-    args: IcreateRateLimiterParams
-  ) => (req: Request, res: Response, next: NextFunction) => Promise<void>;
-  validate(args: IcreateRateLimiterParams): void;
-  middleware: (
-    args: IcreateRateLimiterParams
-  ) => (req: Request, res: Response, next: NextFunction) => void;
+  validate(args: IRateLimiterParams): void;
+  middleware: () => (req: Request, res: Response, next: NextFunction) => void;
 }

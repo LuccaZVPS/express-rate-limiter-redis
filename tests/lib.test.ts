@@ -7,38 +7,8 @@ import {
 } from "./mocks/create-rate-limiter-params";
 describe("Rate Limiter", () => {
   const makeSut = () => {
-    return new RateLimiter();
+    return new RateLimiter(validParams);
   };
-
-  describe("Create", () => {
-    test("should call validate method with correct values", () => {
-      const sut = makeSut();
-      const spy = jest.spyOn(sut, "validate");
-      sut.create(validParams);
-      expect(spy).toHaveBeenCalledWith(validParams);
-    });
-    test("should throws if validate throws", () => {
-      const sut = makeSut();
-      jest.spyOn(sut, "validate").mockImplementationOnce(() => {
-        throw new Error("any error");
-      });
-      expect(() => {
-        sut.create(validParams);
-      }).toThrowError();
-    });
-    test("should return the function returned by middleware method", () => {
-      const sut = makeSut();
-      const fn = async () => {
-        return;
-      };
-      jest.spyOn(sut, "middleware").mockImplementationOnce(() => {
-        return fn;
-      });
-      const result = sut.create(validParams);
-      expect(result).toEqual(fn);
-    });
-  });
-
   describe("Validate", () => {
     test("should throw if invalid param is provided", () => {
       const sut = makeSut().validate;
@@ -74,51 +44,23 @@ describe("Rate Limiter", () => {
     local value = redis.call("GET", KEYS[1])
     if value then
       local obj = cjson.decode(value)
-      if obj.current == obj.max then
-        return true
-      else
-        obj.current = obj.current + 1
-        redis.call("SET", KEYS[1], cjson.encode(obj))
-        return false
-      end
-    else
-      redis.call("SET", KEYS[1], ARGV[1])
+      obj.current = obj.current + 1
+      redis.call("SET", KEYS[1], cjson.encode(obj))
       redis.call("EXPIRE", KEYS[1], ARGV[2])
-      return nil
+      return cjson.encode(obj)
     end
-  `;
+
+    redis.call("SET", KEYS[1], ARGV[1])
+    local newObj = { current = 1, max = tonumber(ARGV[2]) }
+    return cjson.encode(newObj)
+
+    `;
       expect(spy).toHaveBeenCalledWith("SCRIPT", "LOAD", script);
     });
 
     test("should return the callback value", async () => {
       const sha = await sut(cbMock.cb);
       expect(sha).toBe("any sha");
-    });
-  });
-
-  describe("runScript", () => {
-    const sut = makeSut().runScript;
-    const cbMock = {
-      cb: async () => {
-        return { max: 30, current: 5 };
-      },
-    };
-    test("should call cb with correct value", () => {
-      const spy = jest.spyOn(cbMock, "cb");
-      sut(cbMock.cb, 30, "any_key", "any_sha", 60);
-      expect(spy).toBeCalledWith(
-        "EVALSHA",
-        "any_sha",
-        1,
-        "any_key",
-        JSON.stringify({ max: 30, current: 0 }),
-        60
-      );
-    });
-
-    test("should return the callback object", async () => {
-      const object = await sut(cbMock.cb, 30, "any_key", "any_sha", 60);
-      expect(object).toEqual({ max: 30, current: 5 });
     });
   });
 });

@@ -1,6 +1,6 @@
-import { IcreateRateLimiterParams } from "../../source/types";
+import { IRateLimiterParams } from "../../source/types";
 
-export const validParams: IcreateRateLimiterParams = {
+export const validParams: IRateLimiterParams = {
   expiresIn: 60,
   key: () => "any",
   max: 1,
@@ -15,7 +15,7 @@ export const InvalidExpires = {
   message: "",
   whiteList: ["192.168.0.1"],
   store: () => 5,
-} as unknown as IcreateRateLimiterParams;
+} as unknown as IRateLimiterParams;
 export const InvalidStore = {
   expiresIn: 60,
   key: () => "any",
@@ -23,7 +23,7 @@ export const InvalidStore = {
   message: "",
   whiteList: ["192.168.0.1"],
   store: "",
-} as unknown as IcreateRateLimiterParams;
+} as unknown as IRateLimiterParams;
 export const InvalidList = {
   expiresIn: 60,
   key: () => "any",
@@ -31,4 +31,4 @@ export const InvalidList = {
   message: "",
   whiteList: "192.168.0.1",
   store: () => 5,
-} as unknown as IcreateRateLimiterParams;
+} as unknown as IRateLimiterParams;
