@@ -29,7 +29,11 @@ export class RateLimiter implements IRateLimiter {
     return async (req: Request, res: Response, next: NextFunction) => {
       const { store, key, max, expiresIn, message } = this.config;
       const obj = await this.runScript(store, max, key(req), expiresIn);
-      console.log(obj);
+      res.set("X-Rate-Limit-Limit", `${max}`);
+      res.set(
+        "X-Rate-Limit-Remaining",
+        `${obj.current > obj.max ? 0 : max - obj.current}`
+      );
       if (obj.current > obj.max) {
         return res.status(429).send(message || "Too many requests.");
       }
