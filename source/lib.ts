@@ -27,8 +27,12 @@ export class RateLimiter implements IRateLimiter {
   }
   middleware() {
     return async (req: Request, res: Response, next: NextFunction) => {
-      const { store, key, max, expiresIn } = this.config;
-      await this.runScript(store, max, key(req), expiresIn);
+      const { store, key, max, expiresIn, message } = this.config;
+      const obj = await this.runScript(store, max, key(req), expiresIn);
+      console.log(obj);
+      if (obj.current > obj.max) {
+        return res.status(429).send(message || "Too many requests.");
+      }
       next();
     };
   }

@@ -6,7 +6,9 @@ export const validParams: IRateLimiterParams = {
   max: 1,
   message: "",
   whiteList: ["192.168.0.1"],
-  store: () => 5,
+  store: () => {
+    return `{ "max": 5, "current": 4 }`;
+  },
 };
 export const InvalidExpires = {
   expiresIn: "60",
@@ -14,7 +16,9 @@ export const InvalidExpires = {
   max: 1,
   message: "",
   whiteList: ["192.168.0.1"],
-  store: () => 5,
+  store: () => {
+    return `{ "max": 5, "current": 4 }`;
+  },
 } as unknown as IRateLimiterParams;
 export const InvalidStore = {
   expiresIn: 60,
@@ -30,5 +34,7 @@ export const InvalidList = {
   max: 1,
   message: "",
   whiteList: "192.168.0.1",
-  store: () => 5,
+  store: () => {
+    return `{ "max": 5, "current": 4 }`;
+  },
 } as unknown as IRateLimiterParams;

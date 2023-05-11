@@ -10,21 +10,38 @@ describe("Rate Limiter", () => {
   const makeSut = () => {
     return new RateLimiter(validParams);
   };
+  const makeCustomSut = (max: number, current: number) => {
+    const customParam = {
+      ...validParams,
+      store: () => {
+        return `{ "max": ${max}, "current": ${current} }`;
+      },
+    };
+    return new RateLimiter(customParam);
+  };
   describe("Middleware", () => {
-    const res = mockResponse();
     const req = mockRequest();
-    const nextFn = jest.fn();
+    const res = mockResponse();
+    const nextFunction = jest.fn();
+
     test("should call runScript method with correct value", async () => {
       const sut = makeSut();
       const spy = jest.spyOn(sut, "runScript");
       const middleware = sut.middleware();
-      await middleware(req, res, nextFn);
+      await middleware(req, res, nextFunction);
       expect(spy).toHaveBeenCalledWith(
         validParams.store,
         validParams.max,
         validParams.key(req),
         validParams.expiresIn
       );
+    });
+    test("should return 429 if current property is bigger than max", async () => {
+      const sut = makeCustomSut(10, 11);
+      const middleware = sut.middleware();
+      const spy = jest.spyOn(res, "status");
+      await middleware(req, res, nextFunction);
+      expect(spy).toHaveBeenCalledWith(429);
     });
   });
   describe("Validate", () => {
