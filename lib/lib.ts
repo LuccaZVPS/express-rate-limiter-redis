@@ -3,6 +3,20 @@ import { IRateLimiter, IRateLimiterParams, script } from "./types";
 export class RateLimiter implements IRateLimiter {
   config: IRateLimiterParams;
   sha: Promise<string>;
+  resetScript = `redis.call("DEL", KEYS[1])`;
+  mainScript = `
+  local value = redis.call("GET", KEYS[1])
+    if value then
+      local obj = cjson.decode(value)
+      obj.current = obj.current + 1
+      redis.call("SET", KEYS[1], cjson.encode(obj))
+      redis.call("EXPIRE", KEYS[1], ARGV[2])
+      return cjson.encode(obj)
+    end
+    redis.call("SET", KEYS[1], ARGV[1])
+    local newObj = { current = 1, max = tonumber(ARGV[2]) }
+    return cjson.encode(newObj)
+  `;
   constructor(private readonly args: IRateLimiterParams) {
     this.validate(args);
     this.config = args;
@@ -43,20 +57,7 @@ export class RateLimiter implements IRateLimiter {
   async generateSha(
     cb: (...args: string[]) => Promise<string>
   ): Promise<string> {
-    const script = `
-    local value = redis.call("GET", KEYS[1])
-    if value then
-      local obj = cjson.decode(value)
-      obj.current = obj.current + 1
-      redis.call("SET", KEYS[1], cjson.encode(obj))
-      redis.call("EXPIRE", KEYS[1], ARGV[2])
-      return cjson.encode(obj)
-    end
-    redis.call("SET", KEYS[1], ARGV[1])
-    local newObj = { current = 1, max = tonumber(ARGV[2]) }
-    return cjson.encode(newObj)
-    `;
-    return await cb("SCRIPT", "LOAD", script);
+    return await cb("SCRIPT", "LOAD", this.mainScript);
   }
   public validate(args: IRateLimiterParams): void {
     if (typeof args.expiresIn !== "number") {

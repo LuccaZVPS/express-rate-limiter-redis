@@ -74,33 +74,21 @@ describe("Rate Limiter", () => {
   });
 
   describe("generateSha", () => {
-    const sut = makeSut().generateSha;
+    const sut = makeSut();
     const cbMock = {
       cb: async () => {
         return "any sha";
       },
     };
+    const script = makeSut().mainScript;
     test("should call the callback function with correct value", async () => {
       const spy = jest.spyOn(cbMock, "cb");
-      await sut(cbMock.cb);
-      const script = `
-    local value = redis.call("GET", KEYS[1])
-    if value then
-      local obj = cjson.decode(value)
-      obj.current = obj.current + 1
-      redis.call("SET", KEYS[1], cjson.encode(obj))
-      redis.call("EXPIRE", KEYS[1], ARGV[2])
-      return cjson.encode(obj)
-    end
-    redis.call("SET", KEYS[1], ARGV[1])
-    local newObj = { current = 1, max = tonumber(ARGV[2]) }
-    return cjson.encode(newObj)
-    `;
+      await sut.generateSha(cbMock.cb);
       expect(spy).toHaveBeenCalledWith("SCRIPT", "LOAD", script);
     });
 
     test("should return the callback value", async () => {
-      const sha = await sut(cbMock.cb);
+      const sha = await sut.generateSha(cbMock.cb);
       expect(sha).toBe("any sha");
     });
   });
