@@ -10,6 +10,7 @@ export interface IRateLimiterParams {
 }
 
 export interface IRateLimiter {
+  resetKey(key: string): Promise<void>;
   runScript(...args: string[]): Promise<any>;
   generateSha(script: string): Promise<string>;
   validate(args: IRateLimiterParams): void;

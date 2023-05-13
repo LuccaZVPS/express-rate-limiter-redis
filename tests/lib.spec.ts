@@ -72,7 +72,6 @@ describe("Rate Limiter", () => {
       expect(sut(validParams)).toBeFalsy();
     });
   });
-
   describe("generateSha", () => {
     const sut = makeSut();
     const script = makeSut().mainScript;
@@ -85,6 +84,14 @@ describe("Rate Limiter", () => {
     test("should return same value as store function", async () => {
       const sha = await sut.generateSha("");
       expect(sha).toBe(sut.config.store());
+    });
+  });
+  describe("resetKey", () => {
+    test("should call generateSha with correct values", async () => {
+      const sut = makeSut();
+      const spy = jest.spyOn(sut, "generateSha");
+      await sut.resetKey("any_key");
+      expect(spy).toHaveBeenCalledWith(sut.resetScript);
     });
   });
 });
