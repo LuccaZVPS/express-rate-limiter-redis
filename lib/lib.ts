@@ -21,7 +21,8 @@ export class RateLimiter implements IRateLimiter {
     this.config = args;
   }
   async resetKey(key: string): Promise<void> {
-    await this.generateSha(this.resetScript);
+    const sha = await this.generateSha(this.resetScript);
+    await this.runScript(sha, key);
   }
   async runScript(...args: string[]): Promise<any> {
     const sha = await this.generateSha(this.mainScript);
