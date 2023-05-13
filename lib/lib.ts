@@ -1,63 +1,43 @@
 import { NextFunction, Request, Response } from "express";
-import { IRateLimiter, IRateLimiterParams, script } from "./types";
+import { IRateLimiter, IRateLimiterParams } from "./types";
 export class RateLimiter implements IRateLimiter {
   config: IRateLimiterParams;
-  sha: Promise<string>;
   resetScript = `redis.call("DEL", KEYS[1])`;
   mainScript = `
-  local value = redis.call("GET", KEYS[1])
-    if value then
-      local obj = cjson.decode(value)
-      obj.current = obj.current + 1
-      redis.call("SET", KEYS[1], cjson.encode(obj))
-      redis.call("EXPIRE", KEYS[1], ARGV[2])
-      return cjson.encode(obj)
-    end
-    redis.call("SET", KEYS[1], ARGV[1])
-    local newObj = { current = 1, max = tonumber(ARGV[2]) }
-    return cjson.encode(newObj)
+  local current = redis.call("GET", KEYS[1])
+  if current then
+    current = tonumber(current)
+    current = current + 1
+    local expiration = redis.call("TTL", KEYS[1])
+    redis.call("SET", KEYS[1], current, "EX", expiration)
+    return current
+  else
+    redis.call("SET", KEYS[1], ARGV[1], "EX", ARGV[2])
+    return tonumber(ARGV[1])
+  end
   `;
   constructor(private readonly args: IRateLimiterParams) {
     this.validate(args);
     this.config = args;
-    this.sha = this.generateSha(args.store);
   }
-  async runScript(
-    cb: (...args: string[]) => Promise<string>,
-    max: number,
-    key: string,
-    expiresIn: number
-  ): Promise<script> {
-    const sha = await this.sha;
-    const value = await this.config.store(
-      "EVALSHA",
-      `${sha}`,
-      1 as unknown as string,
-      key,
-      JSON.stringify({ max, current: 1 }),
-      expiresIn as unknown as string
-    );
-    return JSON.parse(value);
+  async runScript(...args: string[]): Promise<any> {
+    const sha = await this.generateSha(this.mainScript);
+    return await this.config.store("EVALSHA", `${sha}`, "1", ...args);
   }
   middleware() {
     return async (req: Request, res: Response, next: NextFunction) => {
-      const { store, key, max, expiresIn, message } = this.config;
-      const obj = await this.runScript(store, max, key(req), expiresIn);
+      const { key, max, expiresIn, message } = this.config;
+      const current = await this.runScript(key(req), "1", expiresIn.toString());
       res.set("X-Rate-Limit-Limit", `${max}`);
-      res.set(
-        "X-Rate-Limit-Remaining",
-        `${obj.current > obj.max ? 0 : max - obj.current}`
-      );
-      if (obj.current > obj.max) {
+      res.set("X-Rate-Limit-Remaining", `${current > max ? 0 : max - current}`);
+      if (current > max) {
         return res.status(429).send(message || "Too many requests.");
       }
       next();
     };
   }
-  async generateSha(
-    cb: (...args: string[]) => Promise<string>
-  ): Promise<string> {
-    return await cb("SCRIPT", "LOAD", this.mainScript);
+  async generateSha(script: string): Promise<string> {
+    return await this.config.store("SCRIPT", "LOAD", script);
   }
   public validate(args: IRateLimiterParams): void {
     if (typeof args.expiresIn !== "number") {

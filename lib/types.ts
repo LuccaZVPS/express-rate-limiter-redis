@@ -8,18 +8,10 @@ export interface IRateLimiterParams {
   whiteList?: string[];
   store: (...args: string[]) => any;
 }
-export interface script {
-  current: number;
-  max: number;
-}
+
 export interface IRateLimiter {
-  runScript(
-    cb: (...args: string[]) => Promise<string>,
-    max: number,
-    key: string,
-    expiresIn: number
-  ): Promise<script>;
-  generateSha(cb: (...args: string[]) => Promise<string>): Promise<string>;
+  runScript(...args: string[]): Promise<any>;
+  generateSha(script: string): Promise<string>;
   validate(args: IRateLimiterParams): void;
   middleware: () => (req: Request, res: Response, next: NextFunction) => void;
 }

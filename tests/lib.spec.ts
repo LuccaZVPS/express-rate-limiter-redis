@@ -13,8 +13,9 @@ describe("Rate Limiter", () => {
   const makeCustomSut = (max: number, current: number) => {
     const customParam = {
       ...validParams,
+      max,
       store: () => {
-        return `{ "max": ${max}, "current": ${current} }`;
+        return current;
       },
     };
     return new RateLimiter(customParam);
@@ -30,10 +31,9 @@ describe("Rate Limiter", () => {
       const middleware = sut.middleware();
       await middleware(req, res, nextFunction);
       expect(spy).toHaveBeenCalledWith(
-        validParams.store,
-        validParams.max,
         validParams.key(req),
-        validParams.expiresIn
+        "1",
+        validParams.expiresIn.toString()
       );
     });
     test("should return 429 if current property is bigger than max", async () => {
@@ -75,21 +75,16 @@ describe("Rate Limiter", () => {
 
   describe("generateSha", () => {
     const sut = makeSut();
-    const cbMock = {
-      cb: async () => {
-        return "any sha";
-      },
-    };
     const script = makeSut().mainScript;
-    test("should call the callback function with correct value", async () => {
-      const spy = jest.spyOn(cbMock, "cb");
-      await sut.generateSha(cbMock.cb);
+    test("should call the store function with correct value", async () => {
+      const spy = jest.spyOn(sut.config, "store");
+      await sut.generateSha(sut.mainScript);
       expect(spy).toHaveBeenCalledWith("SCRIPT", "LOAD", script);
     });
 
-    test("should return the callback value", async () => {
-      const sha = await sut.generateSha(cbMock.cb);
-      expect(sha).toBe("any sha");
+    test("should return same value as store function", async () => {
+      const sha = await sut.generateSha("");
+      expect(sha).toBe(sut.config.store());
     });
   });
 });
