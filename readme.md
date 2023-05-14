@@ -1,24 +1,24 @@
-# express-rate-limiter-redis
+# rate-limiter-express-redis
 
-`express-rate-limiter-redis` is a middleware library for rate limiting in Express applications using Redis as the storage backend. It allows you to control the rate of incoming requests from clients and protect your server from excessive traffic.
+`rate-limiter-express-redis` is a middleware library for rate limiting in Express applications using Redis as the storage backend. It allows you to control the rate of incoming requests from clients and protect your server from excessive traffic.
 
 ## Installation
 
 Install the package via npm:
 
 ```shell
-npm install express-rate-limiter-redis
+npm install rate-limiter-express-redis
 ```
 
 ## Usage
 
-To use `express-rate-limiter-redis` in your Express application, follow these steps:
+To use `rate-limiter-express-redis` in your Express application, follow these steps:
 
 1. Import the necessary modules:
 
    ```javascript
    import express from "express";
-   import rateLimiter from "express-rate-limiter-redis";
+   import rateLimiter from "rate-limiter-express-redis";
    import ioredis from "ioredis";
    ```
 
@@ -114,7 +114,7 @@ app.post("/reset", limiter, async (req, res) => {
 
 ## Response Headers
 
-When using `express-rate-limiter-redis`, several custom headers can be added to the response to provide information about the rate limit. These headers can be used by the client to understand the rate limiting status and adjust their requests accordingly.
+When using `rate-limiter-express-redis`, several custom headers can be added to the response to provide information about the rate limit. These headers can be used by the client to understand the rate limiting status and adjust their requests accordingly.
 
 - `X-Rate-Limit-Limit`: Represents the maximum number of requests allowed per client within the defined duration (`max` value from the rate limiter options).
 - `X-Rate-Limit-Remaining`: Indicates the remaining number of requests that the client can make within the defined duration. If the value is negative, it means the client has exceeded the rate limit and no more requests are allowed.
