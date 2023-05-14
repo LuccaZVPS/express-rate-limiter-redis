@@ -38,7 +38,7 @@ To use `express-rate-limiter-redis` in your Express application, follow these st
 
    ```javascript
    const limiter = rateLimiter({
-     expiresIn: 60000, // Rate limiter will expire after 60,000 milliseconds (1 minute)
+     expiresIn: 60 * 60, // Rate limiter will expire after 3600 seconds (1 hour)
      key: (req) => req.ip, // Use the IP address of the request as the key to identify the client
      max: 300, // Maximum number of requests allowed per client within the defined duration
      // @ts-expect-error - Avoid ts errors when using ioredis libary
@@ -51,7 +51,7 @@ To use `express-rate-limiter-redis` in your Express application, follow these st
 
    ```javascript
    const limiter = rateLimiter({
-     expiresIn: 60000, // Rate limiter will expire after 60,000 milliseconds (1 minute)
+     expiresIn: 60 * 60, // Rate limiter will expire after 3600 seconds (1 hour)
      key: (req) => req.ip, // Use the IP address of the request as the key to identify the client
      max: 300, // Maximum number of requests allowed per client within the defined duration
      store: (...args) => client.sendCommand(args), // A callback function to execute Redis commands for storing and retrieving information about the client in the rate limiter
