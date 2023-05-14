@@ -89,10 +89,12 @@ You can also apply the rate limiter middleware to specific routes. Here's an exa
 
 ```javascript
 const loginLimiter = rateLimiter({
-  expiresIn: 60 * 60, // Rate limiter will expire after 60 minutes
-  key: (req) => req.ip, // Use the IP address of the request as the key to identify the client
-  max: 15, // Maximum number of requests allowed per client within the defined duration
-  store: (...args) => client.call(...args), // A callback function to execute Redis commands for storing and retrieving information about the client in the rate limiter
+  expiresIn: 60 * 60,
+  key: (req) => req.ip + req.originalUrl,
+  max: 15,
+  // With ioredis
+  // @ts-expect-error - Avoid ts errors when using ioredis libary
+  store: (...args) => client.call(...args),
   message: "You have reached the maximum number of login attempts.", // Optional message to send when rate limit is exceeded
 });
 
