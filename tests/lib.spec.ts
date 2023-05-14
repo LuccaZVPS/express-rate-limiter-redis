@@ -93,7 +93,7 @@ describe("Rate Limiter", () => {
       await sut.resetKey("any_key");
       expect(spy).toHaveBeenCalledWith(sut.resetScript);
     });
-    test("should call run script with correct values", async () => {
+    test("should call runScript with correct values", async () => {
       const sut = makeSut();
       const spy = jest.spyOn(sut, "runScript");
       jest.spyOn(sut, "generateSha").mockImplementationOnce(async () => {

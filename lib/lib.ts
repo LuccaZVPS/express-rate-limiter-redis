@@ -34,6 +34,8 @@ export class RateLimiter implements IRateLimiter {
       const current = await this.runScript(key(req), "1", expiresIn.toString());
       res.set("X-Rate-Limit-Limit", `${max}`);
       res.set("X-Rate-Limit-Remaining", `${current > max ? 0 : max - current}`);
+      res.set("X-Rate-Limit-Duration", `${this.config.expiresIn}`);
+
       if (current > max) {
         return res.status(429).send(message || "Too many requests.");
       }
@@ -58,3 +60,5 @@ export class RateLimiter implements IRateLimiter {
     }
   }
 }
+const teste = (args: IRateLimiterParams) => new RateLimiter(args).middleware();
+export default teste;
