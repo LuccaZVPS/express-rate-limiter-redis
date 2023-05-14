@@ -10,10 +10,12 @@ describe("Rate Limiter", () => {
   const makeSut = () => {
     return new RateLimiter(validParams);
   };
-  const makeCustomSut = (max: number, current: number) => {
+  const makeCustomSut = (max: number, current: number, time?: number) => {
     const customParam = {
       ...validParams,
       max,
+
+      expiresIn: time || 60,
       store: () => {
         return current;
       },
@@ -50,6 +52,32 @@ describe("Rate Limiter", () => {
       const spy = jest.spyOn(toSpy, "next");
       await middleware(req, res, toSpy.next);
       expect(spy).toHaveBeenCalled();
+    });
+    test("should set the correct headers", async () => {
+      const config = {
+        max: 10,
+        current: 8,
+        time: 60 * 60,
+      };
+      const sut = makeCustomSut(config.max, config.current, config.time);
+      const spy = jest.spyOn(res, "set");
+      const middleware = sut.middleware();
+      await middleware(req, res, nextFunction);
+      expect(spy).toBeCalledTimes(3);
+      expect(spy.mock.calls[0]).toEqual([
+        "X-Rate-Limit-Limit",
+        config.max.toString(),
+      ]);
+
+      expect(spy.mock.calls[1]).toEqual([
+        "X-Rate-Limit-Remaining",
+        (config.max - config.current).toString(),
+      ]);
+
+      expect(spy.mock.calls[2]).toEqual([
+        "X-Rate-Limit-Duration",
+        config.time.toString(),
+      ]);
     });
   });
   describe("Validate", () => {

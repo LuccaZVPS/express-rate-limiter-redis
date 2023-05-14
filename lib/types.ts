@@ -16,3 +16,11 @@ export interface IRateLimiter {
   validate(args: IRateLimiterParams): void;
   middleware: () => (req: Request, res: Response, next: NextFunction) => void;
 }
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Express {
+    interface Request {
+      resetKey(key: string): Promise<void>;
+    }
+  }
+}
