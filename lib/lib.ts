@@ -60,5 +60,3 @@ export class RateLimiter implements IRateLimiter {
     }
   }
 }
-const teste = (args: IRateLimiterParams) => new RateLimiter(args).middleware();
-export default teste;
