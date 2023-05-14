@@ -33,6 +33,7 @@ To use `express-rate-limiter-redis` in your Express application, follow these st
    await client.connect();
    ```
 3. Configure and create the rate limiter middleware:
+
    3.1 Creating an rate limiter usign ioredis
 
    ```javascript
