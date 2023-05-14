@@ -22,7 +22,7 @@ export class RateLimiter implements IRateLimiter {
   }
   async resetKey(key: string): Promise<void> {
     const sha = await this.generateSha(this.resetScript);
-    await this.runScript(sha, key);
+    await this.config.store("EVALSHA", `${sha}`, "1", key);
   }
   async runScript(...args: string[]): Promise<any> {
     const sha = await this.generateSha(this.mainScript);
@@ -31,6 +31,7 @@ export class RateLimiter implements IRateLimiter {
   middleware() {
     return async (req: Request, res: Response, next: NextFunction) => {
       const { key, max, expiresIn, message } = this.config;
+      req.resetKey = this.resetKey.bind(this);
       const current = await this.runScript(key(req), "1", expiresIn.toString());
       res.set("X-Rate-Limit-Limit", `${max}`);
       res.set("X-Rate-Limit-Remaining", `${current > max ? 0 : max - current}`);
