@@ -34,7 +34,7 @@ To use `redis-rate-limit-express` in your Express application, follow these step
    ```
 3. Configure and create the rate limiter middleware:
 
-   3.1 Creating an rate limiter using ioredis
+   3.1 Creating a rate limiter using ioredis
 
    ```javascript
    const limiter = rateLimiter({
@@ -47,7 +47,7 @@ To use `redis-rate-limit-express` in your Express application, follow these step
    });
    ```
 
-   3.2 Creating an rate limiter using ioredis
+   3.2 Creating a rate limiter using ioredis
 
    ```javascript
    const limiter = rateLimiter({
