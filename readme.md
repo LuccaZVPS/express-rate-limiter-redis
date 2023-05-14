@@ -22,7 +22,7 @@ To use `express-rate-limiter-redis` in your Express application, follow these st
    import ioredis from "ioredis";
    ```
 
-2. Create an instance of the Redis client:
+2. Create an instance of the Redis client:<br/>
    2.1 Using ioredis
    ```javascript
    const client = ioredis.createClient();
