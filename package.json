@@ -1,5 +1,5 @@
 {
-  "name": "chat-2.0-backend",
+  "name": "redis-rate-limit-express",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
