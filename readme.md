@@ -47,7 +47,7 @@ To use `redis-rate-limit-express` in your Express application, follow these step
    });
    ```
 
-   3.2 Creating a rate limiter using ioredis
+   3.2 Creating a rate limiter using node-redis
 
    ```javascript
    const limiter = rateLimiter({
